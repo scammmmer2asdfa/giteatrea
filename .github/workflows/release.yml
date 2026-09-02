@@ -51,7 +51,7 @@ jobs:
             echo "Version changed $previous -> $version, will release"
           else
             echo "should_release=false" >> "$GITHUB_OUTPUT"
-            echo "Version unchanged at $version, building binaries only"
+            echo "Version unchanged at $version, skipping the platform builds"
           fi
 
   build:
@@ -68,7 +68,9 @@ jobs:
             target: aarch64-apple-darwin
             slug: macos-arm64
           - label: macOS (Intel)
-            os: macos-13
+            # Cross-compiled from Apple Silicon: the macos-13 Intel runners are
+            # being retired and jobs sat queued for hours waiting on one.
+            os: macos-14
             target: x86_64-apple-darwin
             slug: macos-x64
           - label: Linux (x86_64)

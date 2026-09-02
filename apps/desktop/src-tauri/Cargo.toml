@@ -1,6 +1,6 @@
 [package]
 name = "repolens"
-version = "0.2.0"
+version = "0.2.1"
 description = "Explore any GitHub repository as an interactive map"
 authors = ["RepoLens contributors"]
 license = "MIT"
