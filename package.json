@@ -1,7 +1,7 @@
 {
   "name": "repolens",
   "private": true,
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "RepoLens — a visual GitHub repository explorer",
   "license": "MIT",
   "type": "module",

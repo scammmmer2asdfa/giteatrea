@@ -1,7 +1,9 @@
 name: Release
 
-# Binaries build on every push to main. A GitHub Release is only cut when the
-# root package.json version changes, so ordinary commits don't spam releases.
+# Binaries are built only when a release is actually warranted: the root
+# package.json version changed, or a run was dispatched by hand. Building all
+# four targets on every push queues two macOS runners per commit, which jams
+# the concurrency group and starves later runs.
 on:
   push:
     branches: [main]
@@ -14,7 +16,7 @@ on:
 
 concurrency:
   group: release-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 permissions:
   contents: write
@@ -55,6 +57,7 @@ jobs:
   build:
     name: ${{ matrix.label }}
     needs: meta
+    if: needs.meta.outputs.should_release == 'true'
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false

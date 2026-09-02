@@ -34,6 +34,8 @@ jobs:
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm --filter @repolens/site build
+        env:
+          SITE_BASE: /giteatrea/
 
       - uses: actions/configure-pages@v5
         with:
