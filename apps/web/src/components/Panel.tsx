@@ -73,7 +73,9 @@ export function Gauge({
   return (
     <div className="flex min-w-0 flex-col gap-0.5">
       <span className="legend">{label}</span>
-      <span className={cn('truncate text-xl font-semibold tabular', TONE_CLASS[tone])}>{value}</span>
+      <span className={cn('truncate text-xl font-semibold tabular', TONE_CLASS[tone])}>
+        {value}
+      </span>
     </div>
   );
 }

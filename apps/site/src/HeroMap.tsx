@@ -78,35 +78,35 @@ export function HeroMap() {
         role="img"
         aria-label="A repository rendered as a treemap, with each file sized by its byte count"
       >
-      {rects.map((rect) => {
-        const w = rect.x1 - rect.x0;
-        const h = rect.y1 - rect.y0;
-        const isDir = rect.node.type === 'directory';
-        return (
-          <g key={rect.node.path} transform={`translate(${rect.x0},${rect.y0})`}>
-            <rect
-              width={w}
-              height={h}
-              fill={isDir ? 'transparent' : colorForExtension(rect.node.extension)}
-              fillOpacity={isDir ? 0 : 0.85}
-              className={isDir ? 'stroke-rule-strong' : 'stroke-surface-1'}
-              strokeWidth={isDir ? 1 : 1}
-            />
-            {isDir && w > 60 && (
-              <text x={5} y={12} fontSize={10} className="fill-text-muted font-mono">
-                {rect.node.name}
-              </text>
-            )}
-            {!isDir && w > 52 && h > 16 && (
-              <text x={5} y={13} fontSize={9.5} className="fill-black/80 font-mono">
-                {rect.node.name.length > w / 5.4
-                  ? `${rect.node.name.slice(0, Math.max(1, Math.floor(w / 5.4)))}…`
-                  : rect.node.name}
-              </text>
-            )}
-          </g>
-        );
-      })}
+        {rects.map((rect) => {
+          const w = rect.x1 - rect.x0;
+          const h = rect.y1 - rect.y0;
+          const isDir = rect.node.type === 'directory';
+          return (
+            <g key={rect.node.path} transform={`translate(${rect.x0},${rect.y0})`}>
+              <rect
+                width={w}
+                height={h}
+                fill={isDir ? 'transparent' : colorForExtension(rect.node.extension)}
+                fillOpacity={isDir ? 0 : 0.85}
+                className={isDir ? 'stroke-rule-strong' : 'stroke-surface-1'}
+                strokeWidth={isDir ? 1 : 1}
+              />
+              {isDir && w > 60 && (
+                <text x={5} y={12} fontSize={10} className="fill-text-muted font-mono">
+                  {rect.node.name}
+                </text>
+              )}
+              {!isDir && w > 52 && h > 16 && (
+                <text x={5} y={13} fontSize={9.5} className="fill-black/80 font-mono">
+                  {rect.node.name.length > w / 5.4
+                    ? `${rect.node.name.slice(0, Math.max(1, Math.floor(w / 5.4)))}…`
+                    : rect.node.name}
+                </text>
+              )}
+            </g>
+          );
+        })}
       </svg>
     </div>
   );

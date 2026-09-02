@@ -50,9 +50,7 @@ export function LanguageBar({ languages }: { languages: LanguageBreakdown }) {
               style={{ backgroundColor: colorForExtension(EXTENSION_BY_LANGUAGE[lang]) }}
             />
             <span className="text-text-primary">{lang}</span>
-            <span className="tabular text-text-muted">
-              {((bytes / total) * 100).toFixed(1)}%
-            </span>
+            <span className="tabular text-text-muted">{((bytes / total) * 100).toFixed(1)}%</span>
           </div>
         ))}
       </div>

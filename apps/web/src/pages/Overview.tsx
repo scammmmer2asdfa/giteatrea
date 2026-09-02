@@ -98,7 +98,12 @@ export function Overview() {
                   {index + 1}
                 </span>
                 <img src={person.avatarUrl} alt="" className="h-4 w-4 shrink-0 rounded-full" />
-                <a href={person.htmlUrl} target="_blank" rel="noreferrer" className="truncate text-xs link">
+                <a
+                  href={person.htmlUrl}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="truncate text-xs link"
+                >
                   {person.login}
                 </a>
               </span>

@@ -1,7 +1,13 @@
 import { cn } from '@repolens/ui';
 
 /** Indeterminate progress, drawn as a scanning bar rather than a spinner. */
-export function LoadingState({ label = 'Loading', className }: { label?: string; className?: string }) {
+export function LoadingState({
+  label = 'Loading',
+  className,
+}: {
+  label?: string;
+  className?: string;
+}) {
   return (
     <div
       className={cn(
