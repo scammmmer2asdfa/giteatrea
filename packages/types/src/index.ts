@@ -138,6 +138,19 @@ export interface GitHubUser {
   htmlUrl: string;
 }
 
+/** A user or organization page header. */
+export interface OwnerProfile extends GitHubUser {
+  type: 'User' | 'Organization';
+  bio: string | null;
+  company: string | null;
+  location: string | null;
+  blog: string | null;
+  publicRepos: number;
+  followers: number;
+  following: number;
+  createdAt: string;
+}
+
 export interface RateLimitInfo {
   limit: number;
   remaining: number;

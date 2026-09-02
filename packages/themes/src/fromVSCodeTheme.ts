@@ -55,29 +55,31 @@ export function fromVSCodeTheme(file: VSCodeThemeFile, id: string): Theme {
       'editorLineNumber.foreground',
     ]) ?? darken(textPrimary, 0.45);
 
-  // Structure is the theme's own linework: borders and focus rings, not its brand color.
-  const structure = border;
-  // Signal keeps its meaning across imports by reading the theme's "added/changed"
-  // colors — the closest thing every VS Code theme has to "this is new".
-  const signal =
+  // Rules are the theme's own linework: borders and separators.
+  const rule = border;
+  // The accent is the theme's brand color — what it uses for buttons, links and
+  // focus. Every VS Code theme sets at least one of these.
+  const accent =
     pickColor(colors, [
-      'gitDecoration.addedResourceForeground',
-      'editorGutter.addedBackground',
-      'charts.green',
-      'terminal.ansiGreen',
-    ]) ?? '#8fa890';
+      'button.background',
+      'textLink.foreground',
+      'activityBarBadge.background',
+      'progressBar.background',
+      'focusBorder',
+    ]) ?? '#ff6b1a';
 
   const colorsResult: ThemeColors = {
     surface1,
     surface2,
     surface3,
-    structure,
-    structureInk: ensureContrast(structure, surface1),
+    rule,
+    ruleStrong: ensureContrast(rule, surface1, 3),
     textPrimary,
     textSecondary: ensureContrast(textSecondary, surface1, 4.5),
     textMuted: ensureContrast(textMuted, surface1, 3),
-    signal,
-    signalInk: ensureContrast(signal, surface1),
+    accent,
+    // Accent text must clear 4.5:1 even when the theme's brand color doesn't.
+    accentInk: ensureContrast(accent, surface1, 4.5),
   };
 
   return {

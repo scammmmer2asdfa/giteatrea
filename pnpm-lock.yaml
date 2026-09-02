@@ -130,6 +130,9 @@ importers:
       '@repolens/graph':
         specifier: workspace:*
         version: link:../../packages/graph
+      '@repolens/themes':
+        specifier: workspace:*
+        version: link:../../packages/themes
       '@repolens/types':
         specifier: workspace:*
         version: link:../../packages/types

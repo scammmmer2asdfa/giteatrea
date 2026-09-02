@@ -4,6 +4,20 @@ import { CheckCircle2, XCircle } from 'lucide-react';
 import { Button } from '@repolens/ui';
 import { useAuthStore } from '../store/auth-store.js';
 import { useGitHubClient } from '../hooks/useGitHubClient.js';
+import { ThemePicker } from '../components/ThemePicker.js';
+import { TopBar } from '../components/TopBar.js';
+
+/** Settings reached outside a repository, which has to bring its own chrome. */
+export function StandaloneSettings() {
+  return (
+    <div className="flex h-screen flex-col bg-surface text-text-primary">
+      <TopBar />
+      <main className="flex-1 overflow-auto">
+        <Settings />
+      </main>
+    </div>
+  );
+}
 
 export function Settings() {
   const token = useAuthStore((s) => s.token);
@@ -96,6 +110,10 @@ export function Settings() {
           )}
         </div>
       )}
+
+      <div className="border-t border-rule pt-5">
+        <ThemePicker />
+      </div>
     </div>
   );
 }

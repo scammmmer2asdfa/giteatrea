@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams } from 'react-router-dom';
 import { Search, ExternalLink } from 'lucide-react';
 import { Kbd, Logo } from '@repolens/ui';
 import { parseGitHubInput } from '@repolens/utils';
@@ -26,11 +26,10 @@ export function TopBar() {
   function handleSubmit(event: React.FormEvent) {
     event.preventDefault();
     const parsed = parseGitHubInput(value);
-    if (parsed?.type === 'repo') {
-      navigate(`/${parsed.owner}/${parsed.repo}`);
-      setValue('');
-      inputRef.current?.blur();
-    }
+    if (!parsed) return;
+    navigate(parsed.type === 'repo' ? `/${parsed.owner}/${parsed.repo}` : `/${parsed.owner}`);
+    setValue('');
+    inputRef.current?.blur();
   }
 
   return (
@@ -44,18 +43,23 @@ export function TopBar() {
       {owner && repo && (
         <div className="flex min-w-0 items-center gap-2">
           <span className="h-4 w-px bg-rule-strong" />
-          <a
-            href={`https://github.com/${owner}/${repo}`}
-            target="_blank"
-            rel="noreferrer"
-            className="group flex min-w-0 items-baseline gap-1.5 font-mono text-sm"
-          >
-            <span className="truncate text-text-muted">{owner}/</span>
-            <span className="truncate font-medium text-text-primary group-hover:text-accent">
-              {repo}
-            </span>
-            <ExternalLink className="h-3 w-3 shrink-0 self-center text-text-muted" />
-          </a>
+          <div className="flex min-w-0 items-baseline gap-1.5 font-mono text-sm">
+            <Link to={`/${owner}`} className="truncate text-text-muted hover:text-accent-ink">
+              {owner}
+            </Link>
+            <span className="text-text-muted">/</span>
+            <a
+              href={`https://github.com/${owner}/${repo}`}
+              target="_blank"
+              rel="noreferrer"
+              className="group flex min-w-0 items-baseline gap-1.5"
+            >
+              <span className="truncate font-medium text-text-primary group-hover:text-accent">
+                {repo}
+              </span>
+              <ExternalLink className="h-3 w-3 shrink-0 self-center text-text-muted" />
+            </a>
+          </div>
         </div>
       )}
 

@@ -6,6 +6,7 @@ import type {
   GitHubUser,
   IssueSummary,
   LanguageBreakdown,
+  OwnerProfile,
   PullRequestSummary,
   RateLimitInfo,
   Release,
@@ -110,15 +111,53 @@ export class GitHubClient {
   }
 
   /** Lists a user or organization's repositories, most recently pushed first. */
+  /** Public repositories for any user or organization, most recently pushed first. */
   async getOwnerRepositories(owner: string, params: ListParams = {}): Promise<Repository[]> {
     const data = await this.request<RawRepository[]>(
       `/users/${owner}/repos${this.query({
         sort: 'pushed',
         page: params.page,
-        per_page: params.perPage ?? 12,
+        per_page: params.perPage ?? 30,
       })}`,
     );
     return data.map(mapRepository);
+  }
+
+  /**
+   * Repositories for the signed-in user, including private ones. Requires a
+   * token; `/users/:owner/repos` can only ever return public results.
+   */
+  async getAuthenticatedUserRepositories(params: ListParams = {}): Promise<Repository[]> {
+    const data = await this.request<RawRepository[]>(
+      `/user/repos${this.query({
+        sort: 'pushed',
+        visibility: 'all',
+        affiliation: 'owner,collaborator,organization_member',
+        page: params.page,
+        per_page: params.perPage ?? 30,
+      })}`,
+    );
+    return data.map(mapRepository);
+  }
+
+  /** Profile for a user or organization, used as the owner page header. */
+  async getOwnerProfile(owner: string): Promise<OwnerProfile> {
+    const data = await this.request<RawOwnerProfile>(`/users/${owner}`);
+    return {
+      login: data.login,
+      name: data.name,
+      avatarUrl: data.avatar_url,
+      htmlUrl: data.html_url,
+      type: data.type,
+      bio: data.bio ?? null,
+      company: data.company ?? null,
+      location: data.location ?? null,
+      blog: data.blog || null,
+      publicRepos: data.public_repos,
+      followers: data.followers ?? 0,
+      following: data.following ?? 0,
+      createdAt: data.created_at,
+    };
   }
 
   async getBranches(owner: string, repo: string, defaultBranch?: string): Promise<Branch[]> {
@@ -277,6 +316,18 @@ interface RawUser {
   name: string | null;
   avatar_url: string;
   html_url: string;
+}
+
+interface RawOwnerProfile extends RawUser {
+  type: 'User' | 'Organization';
+  bio?: string | null;
+  company?: string | null;
+  location?: string | null;
+  blog?: string | null;
+  public_repos: number;
+  followers?: number;
+  following?: number;
+  created_at: string;
 }
 
 function mapUser(u: RawUser): GitHubUser {

@@ -1,19 +1,22 @@
-/** The token set RepoLens actually renders with — every theme (built-in or imported) must fill these in. */
+/** The token set RepoLens renders with — every theme (built-in or imported) must fill these in. */
 export interface ThemeColors {
+  /** Page ground. */
   surface1: string;
+  /** Panels and inputs, one step off the ground. */
   surface2: string;
+  /** Raised or selected rows. */
   surface3: string;
-  /** Non-repro blue: frames, hairlines, dotted leaders. Scaffolding you look through. */
-  structure: string;
-  /** The same blue raised to pass 4.5:1, for collar labels and other small structural text. */
-  structureInk: string;
+  /** Hairlines and field borders. */
+  rule: string;
+  /** Heavier dividers and scrollbar thumbs. */
+  ruleStrong: string;
   textPrimary: string;
   textSecondary: string;
   textMuted: string;
-  /** Checker's green: recency, confirmed, current. Large fills and highlights. */
-  signal: string;
-  /** The same green adjusted to pass 4.5:1, for signal text and links. */
-  signalInk: string;
+  /** The one hue in the system: selection, recency, primary actions. */
+  accent: string;
+  /** The same hue adjusted to clear 4.5:1 on the ground, for accent text and links. */
+  accentInk: string;
 }
 
 export type ThemeKind = 'dark' | 'light';

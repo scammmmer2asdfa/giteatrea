@@ -15,6 +15,7 @@
     "@fontsource-variable/jetbrains-mono": "^5.3.0",
     "@repolens/github": "workspace:*",
     "@repolens/graph": "workspace:*",
+    "@repolens/themes": "workspace:*",
     "@repolens/types": "workspace:*",
     "@repolens/ui": "workspace:*",
     "@repolens/utils": "workspace:*",

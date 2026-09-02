@@ -1,44 +1,40 @@
 import type { Theme, ThemeColors } from './types.js';
 
 /**
- * Graphite: the drafting table itself. Non-repro blue for construction lines
- * (blueprint cameras couldn't see that wavelength, so blue meant "structure,
- * not part of the final print"), checker's green for values verified against
- * the calculations.
+ * Graphite: neutral machined grays with a single orange. The grays carry no
+ * hue of their own so the orange never has to compete for attention.
  *
- * Contrast against the #2b2d30 ground, sRGB, computed not eyeballed:
- *   ink 11.8:1 · structureInk 5.3:1 · signal 5.4:1
- *   structure #4a90c4 is 4.0:1 — linework only, never small text.
+ * Contrast against the #131316 ground, sRGB, computed not eyeballed:
+ *   textPrimary 16.6:1 · textSecondary 7.2:1 · textMuted 5.1:1 · accent 6.5:1
  */
 const graphiteColors: ThemeColors = {
-  surface1: '#2b2d30',
-  surface2: '#313438',
-  surface3: '#393c41',
-  structure: '#4a90c4',
-  structureInk: '#6ba6d4',
-  textPrimary: '#ededea',
-  textSecondary: '#a8a9a3',
-  textMuted: '#8b8c85',
-  signal: '#8fa890',
-  signalInk: '#8fa890',
+  surface1: '#131316',
+  surface2: '#1a1a1e',
+  surface3: '#232328',
+  rule: '#2e2e34',
+  ruleStrong: '#3e3e46',
+  textPrimary: '#f0f0f2',
+  textSecondary: '#a0a0a8',
+  textMuted: '#85858f',
+  accent: '#ff6b1a',
+  accentInk: '#ff8a47',
 };
 
 /**
- * Vellum: the same drafting logic on a pale sheet. The dark values are not
- * reused — #8fa890 washes out on a light ground, so both blue and green are
- * darkened until they hold their own.
+ * Paper: the same structure on a light ground. The orange is darkened rather
+ * than reused — #ff6b1a only reaches 2.3:1 on white and fails outright.
  */
-const vellumColors: ThemeColors = {
-  surface1: '#f1efe9',
-  surface2: '#e9e6de',
-  surface3: '#dfdbd1',
-  structure: '#2e6390',
-  structureInk: '#2e6390',
-  textPrimary: '#2a2a26',
-  textSecondary: '#55564f',
-  textMuted: '#6f7068',
-  signal: '#5f7a62',
-  signalInk: '#4f6852',
+const paperColors: ThemeColors = {
+  surface1: '#ffffff',
+  surface2: '#f6f6f7',
+  surface3: '#ececee',
+  rule: '#d9d9dd',
+  ruleStrong: '#bcbcc2',
+  textPrimary: '#16161a',
+  textSecondary: '#5a5a62',
+  textMuted: '#707079',
+  accent: '#c74a08',
+  accentInk: '#b04006',
 };
 
 /**
@@ -48,7 +44,7 @@ const vellumColors: ThemeColors = {
  */
 export const BUILT_IN_THEMES: Theme[] = [
   { id: 'graphite', name: 'Graphite', kind: 'dark', source: 'built-in', colors: graphiteColors },
-  { id: 'vellum', name: 'Vellum', kind: 'light', source: 'built-in', colors: vellumColors },
+  { id: 'paper', name: 'Paper', kind: 'light', source: 'built-in', colors: paperColors },
 ];
 
 export const DEFAULT_THEME_ID = 'graphite';

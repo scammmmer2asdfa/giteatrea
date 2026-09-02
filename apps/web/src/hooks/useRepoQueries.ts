@@ -1,6 +1,7 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { buildFileTree } from '@repolens/utils';
 import { useGitHubClient } from './useGitHubClient.js';
+import { useAuthStore } from '../store/auth-store.js';
 
 export function useRepository(owner: string, repo: string) {
   const client = useGitHubClient();
@@ -77,7 +78,51 @@ export function useOwnerRepositories(owner: string) {
   const client = useGitHubClient();
   return useQuery({
     queryKey: ['owner-repos', owner],
-    queryFn: () => client.getOwnerRepositories(owner),
+    queryFn: () => client.getOwnerRepositories(owner, { perPage: 12 }),
     enabled: Boolean(owner),
+  });
+}
+
+/** The signed-in user, or null when there's no token. Used to unlock private repos. */
+export function useViewer() {
+  const client = useGitHubClient();
+  const token = useAuthStore((s) => s.token);
+  return useQuery({
+    queryKey: ['viewer', token],
+    queryFn: () => client.getAuthenticatedUser(),
+    enabled: Boolean(token),
+    retry: false,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export function useOwnerProfile(owner: string) {
+  const client = useGitHubClient();
+  return useQuery({
+    queryKey: ['owner-profile', owner],
+    queryFn: () => client.getOwnerProfile(owner),
+    enabled: Boolean(owner),
+  });
+}
+
+/**
+ * Every repository for an owner. When the owner is the signed-in user we read
+ * /user/repos instead, because /users/:owner/repos can only return public ones.
+ */
+export function useAllOwnerRepositories(owner: string) {
+  const client = useGitHubClient();
+  const viewer = useViewer();
+  const isViewer = Boolean(viewer.data && viewer.data.login.toLowerCase() === owner.toLowerCase());
+
+  return useInfiniteQuery({
+    queryKey: ['owner-repos-all', owner, isViewer],
+    queryFn: ({ pageParam }) =>
+      isViewer
+        ? client.getAuthenticatedUserRepositories({ page: pageParam, perPage: 50 })
+        : client.getOwnerRepositories(owner, { page: pageParam, perPage: 50 }),
+    // Wait for the viewer check so we don't fetch public-only then refetch.
+    enabled: Boolean(owner) && !viewer.isLoading,
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => (lastPage.length === 50 ? pages.length + 1 : undefined),
   });
 }
