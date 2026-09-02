@@ -1,0 +1,151 @@
+/*
+ * Declared by hand rather than importing the Fontsource stylesheets, which pull
+ * Greek, Cyrillic and Vietnamese subsets and quadruple the font payload.
+ */
+@font-face {
+  font-family: 'Roboto Condensed Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 100 900;
+  src: url('@fontsource-variable/roboto-condensed/files/roboto-condensed-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@font-face {
+  font-family: 'EB Garamond Variable';
+  font-style: normal;
+  font-display: swap;
+  font-weight: 400 800;
+  src: url('@fontsource-variable/eb-garamond/files/eb-garamond-latin-wght-normal.woff2')
+    format('woff2-variations');
+  unicode-range:
+    U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329,
+    U+2000-206F, U+2074, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  /* Graphite: the drafting table. Non-repro blue is structure; checker's green is signal. */
+  :root,
+  [data-sheet='graphite'] {
+    --rl-surface-1: 43 45 48;
+    --rl-surface-2: 49 52 56;
+    --rl-surface-3: 57 60 65;
+    --rl-structure: 74 144 196;
+    --rl-structure-ink: 107 166 212;
+    --rl-ink-1: 237 237 234;
+    --rl-ink-2: 168 169 163;
+    --rl-ink-3: 139 140 133;
+    --rl-signal: 143 168 144;
+    --rl-signal-ink: 143 168 144;
+  }
+
+  /* Vellum: same logic, pale sheet. Values darkened, not reused. */
+  [data-sheet='vellum'] {
+    --rl-surface-1: 241 239 233;
+    --rl-surface-2: 233 230 222;
+    --rl-surface-3: 223 219 209;
+    --rl-structure: 46 99 144;
+    --rl-structure-ink: 46 99 144;
+    --rl-ink-1: 42 42 38;
+    --rl-ink-2: 85 86 79;
+    --rl-ink-3: 111 112 104;
+    --rl-signal: 95 122 98;
+    --rl-signal-ink: 79 104 82;
+  }
+
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-surface font-prose text-base text-text-primary antialiased;
+  }
+
+  /*
+   * Prose runs oldstyle: numerals that rise and descend like lowercase, so they
+   * sit in a sentence instead of shouting through it. Tabular data owns the
+   * lining figures, and the two never compete.
+   */
+  p,
+  .prose {
+    font-variant-numeric: oldstyle-nums proportional-nums;
+  }
+
+  /* Figures sit in columns throughout the collar, so they must align. */
+  .tabular,
+  table,
+  time {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  ::selection {
+    @apply bg-signal/30;
+  }
+
+  * {
+    scrollbar-color: rgb(var(--rl-structure) / 0.5) transparent;
+    scrollbar-width: thin;
+  }
+
+  ::-webkit-scrollbar {
+    width: 11px;
+    height: 11px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    @apply border-4 border-solid border-surface bg-structure/50;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer components {
+  /* A map's outer frame. Doubled, as drawn on a quadrangle sheet. */
+  .neatline {
+    @apply border border-rule;
+    box-shadow:
+      inset 0 0 0 2px rgb(var(--rl-surface-1)),
+      inset 0 0 0 3px rgb(var(--rl-structure));
+  }
+
+  /* Collar labels: condensed, small, never used as a heading eyebrow. */
+  .collar-label {
+    @apply font-collar text-xs font-medium text-structure-ink;
+  }
+
+  /* An index entry: label, dotted leader, right-aligned figure. */
+  .leader {
+    @apply flex items-baseline gap-1.5;
+  }
+
+  .leader-fill {
+    @apply flex-1 border-b border-dotted;
+    border-color: rgb(var(--rl-structure) / 0.6);
+    transform: translateY(-0.2em);
+  }
+
+  /*
+   * A link is a callout — the thing you're meant to notice and act on — so it
+   * takes signal green and a dashed leader, the drafting convention for
+   * "this points somewhere else."
+   */
+  .link {
+    @apply text-signal-ink underline decoration-dashed underline-offset-[3px];
+    text-decoration-color: rgb(var(--rl-signal-ink) / 0.5);
+  }
+
+  .link:hover {
+    text-decoration-color: rgb(var(--rl-signal-ink));
+  }
+}
