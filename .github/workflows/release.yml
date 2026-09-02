@@ -1,0 +1,187 @@
+name: Release
+
+# Binaries build on every push to main. A GitHub Release is only cut when the
+# root package.json version changes, so ordinary commits don't spam releases.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      force_release:
+        description: 'Cut a release even if the version did not change'
+        type: boolean
+        default: false
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  meta:
+    name: Decide what to build
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      should_release: ${{ steps.v.outputs.should_release }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - id: v
+        name: Read version and compare with previous commit
+        run: |
+          version="$(node -p "require('./package.json').version")"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+
+          if [ "${{ github.event.inputs.force_release }}" = "true" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "Forced release of v$version"
+            exit 0
+          fi
+
+          previous="$(git show HEAD~1:package.json 2>/dev/null | node -p "JSON.parse(require('fs').readFileSync(0,'utf8')).version" 2>/dev/null || echo none)"
+          if [ "$version" != "$previous" ]; then
+            echo "should_release=true" >> "$GITHUB_OUTPUT"
+            echo "Version changed $previous -> $version, will release"
+          else
+            echo "should_release=false" >> "$GITHUB_OUTPUT"
+            echo "Version unchanged at $version, building binaries only"
+          fi
+
+  build:
+    name: ${{ matrix.label }}
+    needs: meta
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - label: macOS (Apple Silicon)
+            os: macos-14
+            target: aarch64-apple-darwin
+            slug: macos-arm64
+          - label: macOS (Intel)
+            os: macos-13
+            target: x86_64-apple-darwin
+            slug: macos-x64
+          - label: Linux (x86_64)
+            os: ubuntu-22.04
+            target: x86_64-unknown-linux-gnu
+            slug: linux-x64
+          - label: Windows (x86_64)
+            os: windows-latest
+            target: x86_64-pc-windows-msvc
+            slug: windows-x64
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # No `version:` here on purpose — packageManager in package.json is the
+      # single source of truth, and setting both makes the action hard-fail.
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # WebKitGTK and the packaging tools Tauri shells out to on Linux.
+      - name: Install Linux system dependencies
+        if: matrix.os == 'ubuntu-22.04'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y \
+            libwebkit2gtk-4.1-dev \
+            libayatana-appindicator3-dev \
+            librsvg2-dev \
+            patchelf \
+            libxdo-dev \
+            libssl-dev \
+            build-essential \
+            file
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - uses: swatinem/rust-cache@v2
+        with:
+          workspaces: apps/desktop/src-tauri -> target
+          key: ${{ matrix.target }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      # The web build runs via tauri.conf.json's beforeBuildCommand, so it is
+      # deliberately not repeated here.
+      - uses: tauri-apps/tauri-action@v0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          projectPath: apps/desktop
+          args: --target ${{ matrix.target }}
+          includeUpdaterJson: false
+
+      # Both macOS targets emit an identically named RepoLens.app.tar.gz, which
+      # would silently overwrite one another once artifacts are merged, so the
+      # platform slug goes into the filename before they ever leave the runner.
+      - name: Collect and disambiguate bundles
+        shell: bash
+        env:
+          SLUG: ${{ matrix.slug }}
+        run: |
+          set -euo pipefail
+          mkdir -p artifacts
+          root="apps/desktop/src-tauri/target/${{ matrix.target }}/release/bundle"
+
+          find "$root" -type f \
+            \( -name '*.dmg' -o -name '*.app.tar.gz' -o -name '*.deb' \
+               -o -name '*.rpm' -o -name '*.AppImage' -o -name '*.msi' -o -name '*.exe' \) \
+            -print0 |
+          while IFS= read -r -d '' file; do
+            base="$(basename "$file")"
+            case "$base" in
+              *.app.tar.gz) name="${base%.app.tar.gz}-${SLUG}.app.tar.gz" ;;
+              *)            name="${base%.*}-${SLUG}.${base##*.}" ;;
+            esac
+            cp "$file" "artifacts/$name"
+          done
+
+          ls -la artifacts
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: repolens-${{ matrix.slug }}
+          path: artifacts/*
+          if-no-files-found: error
+          retention-days: 14
+
+  release:
+    name: Publish release
+    needs: [meta, build]
+    if: needs.meta.outputs.should_release == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: List release assets
+        run: find dist -type f | sort
+
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.meta.outputs.version }}
+          name: RepoLens v${{ needs.meta.outputs.version }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          fail_on_unmatched_files: true
+          files: dist/**/*

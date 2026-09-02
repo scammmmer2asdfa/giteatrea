@@ -1,4 +1,4 @@
-import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Landing } from './pages/Landing.js';
 import { RepoShell } from './pages/RepoShell.js';
@@ -21,10 +21,15 @@ const queryClient = new QueryClient({
   },
 });
 
+// The desktop shell serves from a custom protocol with no server to resolve a
+// reloaded deep path, so it needs hash routing. The web build keeps clean URLs.
+const isDesktop = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
+const Router = isDesktop ? HashRouter : BrowserRouter;
+
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
+      <Router>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/:owner/:repo" element={<RepoShell />}>
@@ -43,7 +48,7 @@ export function App() {
           </Route>
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
-      </BrowserRouter>
+      </Router>
     </QueryClientProvider>
   );
 }

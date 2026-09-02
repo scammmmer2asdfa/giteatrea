@@ -2,8 +2,14 @@
   "name": "@repolens/desktop",
   "version": "0.1.0",
   "private": true,
-  "description": "Tauri shell for RepoLens (planned — see README.md in this folder).",
+  "description": "Tauri shell for RepoLens.",
   "scripts": {
-    "dev": "echo 'Desktop app not scaffolded yet. See apps/desktop/README.md.' && exit 1"
+    "dev": "tauri dev",
+    "build": "tauri build",
+    "tauri": "tauri",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "^2.1.0"
   }
 }
