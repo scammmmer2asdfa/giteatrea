@@ -26,10 +26,13 @@ const queryClient = new QueryClient({
 const isDesktop = typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 const Router = isDesktop ? HashRouter : BrowserRouter;
 
+// Matches Vite's base so the app still routes when mounted at /app/.
+const basename = isDesktop ? undefined : import.meta.env.BASE_URL;
+
 export function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router>
+      <Router basename={basename}>
         <Routes>
           <Route path="/" element={<Landing />} />
           <Route path="/:owner/:repo" element={<RepoShell />}>

@@ -21,8 +21,10 @@ type Platform = {
   label: string;
   detail: string;
   icon: typeof Apple;
-  /** Matches the asset filenames produced by .github/workflows/release.yml. */
-  match: (name: string) => boolean;
+  /** The slug .github/workflows/release.yml stamps into every asset filename. */
+  slug: string;
+  /** Extensions in preference order. `.app.tar.gz` is an updater artifact, never offered. */
+  extensions: string[];
 };
 
 const PLATFORMS: Platform[] = [
@@ -31,30 +33,43 @@ const PLATFORMS: Platform[] = [
     label: 'macOS',
     detail: 'Apple silicon',
     icon: Apple,
-    match: (n) => /aarch64|arm64/.test(n) && /\.(dmg|app\.tar\.gz)$/.test(n),
+    slug: 'macos-arm64',
+    extensions: ['.dmg'],
   },
   {
     id: 'mac-intel',
     label: 'macOS',
     detail: 'Intel',
     icon: Apple,
-    match: (n) => /x64|x86_64/.test(n) && /\.dmg$/.test(n),
+    slug: 'macos-x64',
+    extensions: ['.dmg'],
   },
   {
     id: 'windows',
     label: 'Windows',
     detail: 'x86-64',
     icon: Monitor,
-    match: (n) => /\.(msi|exe)$/.test(n),
+    slug: 'windows-x64',
+    extensions: ['.exe', '.msi'],
   },
   {
     id: 'linux',
     label: 'Linux',
-    detail: 'AppImage / deb',
+    detail: 'AppImage, deb, rpm',
     icon: Terminal,
-    match: (n) => /\.(AppImage|deb)$/.test(n),
+    slug: 'linux-x64',
+    extensions: ['.AppImage', '.deb', '.rpm'],
   },
 ];
+
+/** Picks the most user-friendly asset for a platform, honouring extension order. */
+function pickAsset(assets: ReleaseAsset[], platform: Platform): ReleaseAsset | undefined {
+  for (const extension of platform.extensions) {
+    const match = assets.find((a) => a.name.includes(platform.slug) && a.name.endsWith(extension));
+    if (match) return match;
+  }
+  return undefined;
+}
 
 function formatSize(bytes: number): string {
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
@@ -101,7 +116,7 @@ export function Downloads() {
 
         <div className="mt-8 grid gap-px overflow-hidden border border-rule bg-rule sm:grid-cols-2 lg:grid-cols-4">
           {PLATFORMS.map((platform) => {
-            const asset = release?.assets.find((a) => platform.match(a.name));
+            const asset = release ? pickAsset(release.assets, platform) : undefined;
             return (
               <div key={platform.id} className="flex flex-col gap-3 bg-surface-1 p-5">
                 <platform.icon className="h-5 w-5 text-text-muted" strokeWidth={1.5} />
