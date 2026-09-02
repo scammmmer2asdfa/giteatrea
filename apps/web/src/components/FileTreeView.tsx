@@ -58,20 +58,20 @@ function TreeRow({
         style={{ paddingLeft: `${depth * 14 + 8}px` }}
         className={cn(
           'flex w-full items-center gap-1.5 py-0.5 pr-2 text-left font-mono text-xs hover:bg-surface-2',
-          isSelected ? 'bg-signal/15 text-text-primary' : 'text-text-secondary',
+          isSelected ? 'lit' : 'text-text-secondary',
         )}
       >
         {isDirectory ? (
           expanded ? (
-            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-structure" />
+            <ChevronDown className="h-3.5 w-3.5 shrink-0 text-text-muted" />
           ) : (
-            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-structure" />
+            <ChevronRight className="h-3.5 w-3.5 shrink-0 text-text-muted" />
           )
         ) : (
           <span className="w-3.5 shrink-0" />
         )}
         {isDirectory ? (
-          <Folder className="h-3.5 w-3.5 shrink-0 text-structure" strokeWidth={1.75} />
+          <Folder className="h-3.5 w-3.5 shrink-0 text-accent" strokeWidth={1.75} />
         ) : (
           <File className="h-3.5 w-3.5 shrink-0 text-text-muted" strokeWidth={1.75} />
         )}

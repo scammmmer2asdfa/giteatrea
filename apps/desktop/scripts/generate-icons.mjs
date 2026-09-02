@@ -8,54 +8,71 @@ import { fileURLToPath } from 'node:url';
 
 const OUT = join(dirname(fileURLToPath(import.meta.url)), '..', 'src-tauri', 'icons');
 
-const GROUND = [0x2b, 0x2d, 0x30];
-const STRUCTURE = [0x4a, 0x90, 0xc4];
-const SIGNAL = [0x8f, 0xa8, 0x90];
-const INK = [0xed, 0xed, 0xea];
+const GROUND = [0x13, 0x13, 0x16];
+const ACCENT = [0xff, 0x6b, 0x1a];
+const INK = [0xf0, 0xf0, 0xf2];
 
-/** The app mark: a sheet neatline enclosing four parcels, one of them "recent". */
+/**
+ * The RepoLens mark: a viewfinder reticle framing one parcel of a treemap.
+ * The blocks are the repository, the brackets are the lens, and the orange
+ * block is whatever you are currently looking at.
+ */
 function draw(size) {
   const px = Buffer.alloc(size * size * 4);
   const set = (x, y, [r, g, b], a = 255) => {
     if (x < 0 || y < 0 || x >= size || y >= size) return;
     const i = (y * size + x) * 4;
-    px[i] = r;
-    px[i + 1] = g;
-    px[i + 2] = b;
-    px[i + 3] = a;
+    // Composite onto whatever is already there so overlaps read correctly.
+    const dst = px[i + 3];
+    const sa = a / 255;
+    const da = (dst / 255) * (1 - sa);
+    const out = sa + da;
+    px[i] = out ? Math.round((r * sa + px[i] * da) / out) : 0;
+    px[i + 1] = out ? Math.round((g * sa + px[i + 1] * da) / out) : 0;
+    px[i + 2] = out ? Math.round((b * sa + px[i + 2] * da) / out) : 0;
+    px[i + 3] = Math.round(out * 255);
   };
-  const rect = (x0, y0, x1, y1, color) => {
-    for (let y = Math.round(y0); y < Math.round(y1); y++) {
-      for (let x = Math.round(x0); x < Math.round(x1); x++) set(x, y, color);
+  const rect = (x0, y0, x1, y1, color, a = 255) => {
+    // Normalized so callers may pass reversed bounds (used to mirror corners).
+    const ax = Math.round(Math.min(x0, x1));
+    const bx = Math.round(Math.max(x0, x1));
+    const ay = Math.round(Math.min(y0, y1));
+    const by = Math.round(Math.max(y0, y1));
+    for (let y = ay; y < by; y++) {
+      for (let x = ax; x < bx; x++) set(x, y, color, a);
     }
-  };
-  const frame = (x0, y0, x1, y1, w, color) => {
-    rect(x0, y0, x1, y0 + w, color);
-    rect(x0, y1 - w, x1, y1, color);
-    rect(x0, y0, x0 + w, y1, color);
-    rect(x1 - w, y0, x1, y1, color);
   };
 
   const s = size;
-  const u = s / 32;
-  const line = Math.max(1, Math.round(u));
-
+  const u = s / 24;
   rect(0, 0, s, s, GROUND);
-  frame(2 * u, 2 * u, s - 2 * u, s - 2 * u, line, STRUCTURE);
-  frame(3.5 * u, 3.5 * u, s - 3.5 * u, s - 3.5 * u, line, STRUCTURE);
 
-  // Parcels sized unevenly, the way a treemap divides by weight.
-  const i0 = 5.5 * u;
-  const i1 = s - 5.5 * u;
-  const midX = i0 + (i1 - i0) * 0.58;
-  const midY = i0 + (i1 - i0) * 0.62;
-  const gap = Math.max(1, Math.round(u * 0.6));
+  // Treemap parcels, sized unevenly the way real file weights fall.
+  const g = Math.max(1, Math.round(0.7 * u));
+  rect(2 * u, 2 * u, 13 * u, 11 * u, INK, 70);
+  rect(13 * u + g, 2 * u, 22 * u, 7 * u, INK, 70);
+  rect(13 * u + g, 7 * u + g, 22 * u, 11 * u, INK, 70);
+  rect(2 * u, 11 * u + g, 8 * u, 22 * u, INK, 70);
+  rect(8 * u + g, 11 * u + g, 22 * u, 22 * u, INK, 70);
 
-  rect(i0, i0, midX - gap, midY - gap, INK);
-  rect(midX, i0, i1, midY * 0.72, STRUCTURE);
-  rect(midX, midY * 0.72 + gap, i1, midY - gap, INK);
-  rect(i0, midY, midX * 0.78, i1, INK);
-  rect(midX * 0.78 + gap, midY, i1, i1, SIGNAL); // the one recent parcel
+  // The parcel under inspection.
+  rect(10.5 * u, 13.2 * u, 16.5 * u, 19.3 * u, ACCENT);
+
+  // Viewfinder brackets: four corners with clearance, never a closed box.
+  const t = Math.max(1, Math.round(1.2 * u));
+  const arm = 3 * u;
+  const x0 = 7 * u;
+  const y0 = 10 * u;
+  const x1 = 20 * u;
+  const y1 = 22.5 * u;
+  const corner = (cx, cy, dx, dy) => {
+    rect(cx, cy, cx + dx * arm, cy + dy * t, INK);
+    rect(cx, cy, cx + dx * t, cy + dy * arm, INK);
+  };
+  corner(x0, y0, 1, 1);
+  corner(x1, y0, -1, 1);
+  corner(x0, y1, 1, -1);
+  corner(x1, y1, -1, -1);
 
   return px;
 }

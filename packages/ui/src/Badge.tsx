@@ -1,26 +1,25 @@
 import type { ReactNode } from 'react';
 import { cn } from './cn.js';
 
-/** A legend chip. Rectangular, because legend keys on a sheet are boxes. */
+/** Orange marks what's current or needs attention; everything else stays neutral. */
 export function Badge({
   children,
   tone = 'neutral',
   className,
 }: {
   children: ReactNode;
-  /** `current` is the only tone allowed the signal green — it never marks an error. */
-  tone?: 'neutral' | 'current' | 'muted';
+  tone?: 'neutral' | 'accent' | 'outline';
   className?: string;
 }) {
   const tones: Record<string, string> = {
-    neutral: 'border-structure/60 text-text-secondary',
-    current: 'border-signal/70 text-signal-ink',
-    muted: 'border-structure/30 text-text-muted',
+    neutral: 'border-transparent bg-surface-3 text-text-secondary',
+    accent: 'border-transparent bg-accent text-black',
+    outline: 'border-rule bg-transparent text-text-muted',
   };
   return (
     <span
       className={cn(
-        'inline-flex items-center border px-1.5 py-px font-collar text-xs leading-4',
+        'inline-flex items-center rounded-control border px-1.5 py-[1px] text-2xs font-medium leading-4',
         tones[tone],
         className,
       )}

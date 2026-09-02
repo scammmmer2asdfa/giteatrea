@@ -13,6 +13,21 @@ function jsonResponse(
 }
 
 describe('GitHubClient', () => {
+  it('binds the default fetch to the global scope', async () => {
+    // Regression: an unbound `fetch` called as `this.fetchImpl()` throws
+    // "Can only call Window.fetch on instances of Window" in the browser.
+    const spy = vi.spyOn(globalThis, 'fetch').mockImplementation(function (this: unknown) {
+      expect(this === undefined || this === globalThis).toBe(true);
+      return Promise.resolve(jsonResponse({}));
+    });
+    try {
+      await new GitHubClient().getLanguages('facebook', 'react');
+      expect(spy).toHaveBeenCalledOnce();
+    } finally {
+      spy.mockRestore();
+    }
+  });
+
   it('maps a repository payload to the internal Repository shape', async () => {
     const fetchImpl = vi.fn().mockResolvedValue(
       jsonResponse({

@@ -26,7 +26,7 @@ export function Settings() {
   return (
     <div className="mx-auto flex max-w-xl flex-col gap-6 px-8 py-7">
       <div>
-        <h1 className="font-collar text-xl font-bold text-text-primary">Settings</h1>
+        <h1 className="text-xl font-semibold tracking-tight text-text-primary">Settings</h1>
         <p className="mt-1 text-base text-text-secondary">
           Without a token, GitHub allows you 60 requests an hour — enough for a few pages. Adding
           one raises that to 5,000 and lets you open your private repositories.
@@ -34,7 +34,7 @@ export function Settings() {
       </div>
 
       <form onSubmit={handleSave} className="flex flex-col gap-2">
-        <label htmlFor="token" className="collar-label">
+        <label htmlFor="token" className="legend">
           Personal access token
         </label>
         <input
@@ -43,7 +43,7 @@ export function Settings() {
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           placeholder="ghp_"
-          className="h-9 w-full rounded-control border border-structure/60 bg-surface-2 px-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-signal focus:outline-none"
+          className="h-9 w-full rounded-control border border-rule bg-surface-2 px-3 font-mono text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
           autoComplete="off"
         />
         <p className="text-sm text-text-muted">
@@ -89,7 +89,7 @@ export function Settings() {
                 className="h-8 w-8 border border-rule grayscale"
               />
               <p className="flex items-center gap-1.5 text-base text-text-primary">
-                <CheckCircle2 className="h-3.5 w-3.5 text-signal-ink" strokeWidth={1.75} />
+                <CheckCircle2 className="h-3.5 w-3.5 text-accent" strokeWidth={1.75} />
                 Signed in as {identity.data.login}
               </p>
             </div>

@@ -49,7 +49,7 @@ export function Files() {
           <div className="flex flex-col">
             <div className="sticky top-0 flex items-center justify-between border-b border-rule bg-surface-1 px-4 py-1.5">
               <p className="truncate font-mono text-xs text-text-primary">{selectedPath}</p>
-              <span className="shrink-0 font-collar text-sm tabular text-text-muted">
+              <span className="shrink-0 font-mono text-xs tabular text-text-muted">
                 {formatBytes(selectedNode.size)}
               </span>
             </div>

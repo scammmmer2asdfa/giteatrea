@@ -8,15 +8,14 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<NonNullable<ButtonProps['variant']>, string> = {
-  primary:
-    'border-text-primary bg-text-primary text-surface-1 hover:bg-transparent hover:text-text-primary',
-  secondary: 'border-rule bg-transparent text-text-primary hover:bg-surface-2',
+  primary: 'border-accent bg-accent text-surface-1 hover:brightness-110',
+  secondary: 'border-rule bg-surface-3 text-text-primary hover:border-rule-strong',
   ghost: 'border-transparent bg-transparent text-text-secondary hover:text-text-primary',
 };
 
 const SIZE_CLASSES: Record<NonNullable<ButtonProps['size']>, string> = {
-  sm: 'h-6 px-2 text-xs gap-1.5',
-  md: 'h-8 px-3 text-sm gap-2',
+  sm: 'h-6 px-2 text-2xs gap-1.5',
+  md: 'h-8 px-3 text-xs gap-2',
 };
 
 export function Button({
@@ -29,8 +28,8 @@ export function Button({
   return (
     <button
       className={cn(
-        'inline-flex items-center justify-center rounded-control border font-collar font-medium',
-        'focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-signal',
+        'inline-flex items-center justify-center rounded-control border font-medium',
+        'focus-visible:outline focus-visible:outline-1 focus-visible:outline-offset-2 focus-visible:outline-accent',
         'disabled:cursor-not-allowed disabled:opacity-40',
         VARIANT_CLASSES[variant],
         SIZE_CLASSES[size],

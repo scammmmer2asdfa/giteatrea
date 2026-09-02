@@ -30,8 +30,7 @@ export function LanguageBar({ languages }: { languages: LanguageBreakdown }) {
 
   return (
     <div className="flex flex-col gap-2.5">
-      {/* Read as a scale bar: one continuous strip, divided, no rounded ends. */}
-      <div className="flex h-2.5 w-full border border-rule">
+      <div className="flex h-1.5 w-full overflow-hidden rounded-full">
         {entries.map(([lang, bytes]) => (
           <div
             key={lang}
@@ -43,16 +42,15 @@ export function LanguageBar({ languages }: { languages: LanguageBreakdown }) {
           />
         ))}
       </div>
-      <div className="flex flex-wrap gap-x-5 gap-y-1">
+      <div className="flex flex-wrap gap-x-4 gap-y-1">
         {entries.slice(0, 8).map(([lang, bytes]) => (
-          <div key={lang} className="flex items-center gap-1.5 font-collar text-sm">
-            {/* Square keys, as printed in a sheet legend. */}
+          <div key={lang} className="flex items-center gap-1.5 text-xs">
             <span
-              className="h-2.5 w-2.5 border border-rule"
+              className="h-2 w-2 rounded-full"
               style={{ backgroundColor: colorForExtension(EXTENSION_BY_LANGUAGE[lang]) }}
             />
             <span className="text-text-primary">{lang}</span>
-            <span className="tabular text-text-secondary">
+            <span className="tabular text-text-muted">
               {((bytes / total) * 100).toFixed(1)}%
             </span>
           </div>

@@ -27,7 +27,7 @@ export function RepoTreemap({ root, focusPath, onFocusChange, onSelectFile }: Re
 
   return (
     <div className="flex h-full flex-col gap-2">
-      <div className="flex flex-wrap items-center gap-1 font-collar text-sm text-text-secondary">
+      <div className="flex flex-wrap items-center gap-1 font-mono text-xs text-text-secondary">
         <button className="hover:text-text-primary" onClick={() => onFocusChange('')}>
           {root.name || 'root'}
         </button>
@@ -35,7 +35,7 @@ export function RepoTreemap({ root, focusPath, onFocusChange, onSelectFile }: Re
           const path = breadcrumbParts.slice(0, index + 1).join('/');
           return (
             <span key={path} className="flex items-center gap-1">
-              <span className="text-structure">/</span>
+              <span className="text-rule-strong">/</span>
               <button className="hover:text-text-primary" onClick={() => onFocusChange(path)}>
                 {part}
               </button>
@@ -44,7 +44,7 @@ export function RepoTreemap({ root, focusPath, onFocusChange, onSelectFile }: Re
         })}
       </div>
 
-      <div ref={ref} className="neatline relative min-h-0 flex-1 overflow-hidden">
+      <div ref={ref} className="field relative min-h-0 flex-1 overflow-hidden">
         <svg width={size.width} height={size.height} className="block">
           {rects.map((rect) => {
             const width = rect.x1 - rect.x0;
@@ -69,7 +69,7 @@ export function RepoTreemap({ root, focusPath, onFocusChange, onSelectFile }: Re
                   width={width}
                   height={height}
                   fill={isDirectory ? 'transparent' : colorForExtension(rect.node.extension)}
-                  className={isDirectory ? 'stroke-structure' : 'stroke-surface-1'}
+                  className={isDirectory ? 'stroke-rule-strong' : 'stroke-surface-1'}
                   strokeWidth={1}
                 />
                 {showLabel && (
@@ -78,8 +78,8 @@ export function RepoTreemap({ root, focusPath, onFocusChange, onSelectFile }: Re
                     y={11}
                     fontSize={10}
                     className={cn(
-                      'select-none font-collar',
-                      isDirectory ? 'fill-structure-ink' : 'fill-surface-1',
+                      'select-none font-mono',
+                      isDirectory ? 'fill-text-secondary' : 'fill-surface-1',
                     )}
                   >
                     {rect.node.name.length > width / 5
@@ -94,11 +94,11 @@ export function RepoTreemap({ root, focusPath, onFocusChange, onSelectFile }: Re
 
         {tooltip && (
           <div
-            className="pointer-events-none fixed z-50 border border-structure bg-surface-2 px-2 py-1"
+            className="pointer-events-none fixed z-50 field px-2 py-1"
             style={{ left: tooltip.x + 12, top: tooltip.y + 12 }}
           >
             <p className="font-mono text-xs text-text-primary">{tooltip.node.path || root.name}</p>
-            <p className="font-collar text-xs tabular text-text-muted">
+            <p className="font-mono text-xs tabular text-text-muted">
               {formatBytes(tooltip.node.size)}
             </p>
           </div>

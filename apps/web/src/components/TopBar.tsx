@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { Search, ExternalLink, ScanSearch } from 'lucide-react';
-import { Kbd } from '@repolens/ui';
+import { Search, ExternalLink } from 'lucide-react';
+import { Kbd, Logo } from '@repolens/ui';
 import { parseGitHubInput } from '@repolens/utils';
 
 export function TopBar() {
@@ -34,40 +34,42 @@ export function TopBar() {
   }
 
   return (
-    <header className="flex h-11 shrink-0 items-center gap-4 border-b border-rule bg-surface-1 px-3">
-      <a
-        href="/"
-        className="flex items-center gap-1.5 font-collar text-sm font-bold tracking-tight"
-      >
-        <ScanSearch className="h-4 w-4 text-structure" strokeWidth={2} />
-        RepoLens
+    <header className="flex h-12 shrink-0 items-center gap-5 border-b border-rule bg-surface-1 pl-3 pr-4">
+      <a href="/" className="flex shrink-0 items-center gap-2">
+        <Logo className="h-[19px] w-[19px] text-text-primary" />
+        <span className="text-[13px] font-semibold tracking-tight">RepoLens</span>
       </a>
 
-      <form onSubmit={handleSubmit} className="relative max-w-md flex-1">
-        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-structure" />
-        <input
-          ref={inputRef}
-          value={value}
-          onChange={(e) => setValue(e.target.value)}
-          placeholder="Open a repository (owner/repo)"
-          className="h-7 w-full rounded-control border border-structure/60 bg-surface-2 pl-8 pr-10 font-collar text-sm text-text-primary placeholder:text-text-muted focus:border-signal focus:outline-none"
-        />
-        <Kbd className="absolute right-2 top-1/2 -translate-y-1/2">/</Kbd>
-      </form>
-
-      <div className="ml-auto flex items-center gap-3 font-collar text-sm text-text-secondary">
-        {owner && repo && (
+      {/* The repository under inspection is the single most important fact on screen. */}
+      {owner && repo && (
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="h-4 w-px bg-rule-strong" />
           <a
             href={`https://github.com/${owner}/${repo}`}
             target="_blank"
             rel="noreferrer"
-            className="link flex items-center gap-1"
+            className="group flex min-w-0 items-baseline gap-1.5 font-mono text-sm"
           >
-            {owner}/{repo}
-            <ExternalLink className="h-3 w-3" />
+            <span className="truncate text-text-muted">{owner}/</span>
+            <span className="truncate font-medium text-text-primary group-hover:text-accent">
+              {repo}
+            </span>
+            <ExternalLink className="h-3 w-3 shrink-0 self-center text-text-muted" />
           </a>
-        )}
-      </div>
+        </div>
+      )}
+
+      <form onSubmit={handleSubmit} className="relative ml-auto w-72">
+        <Search className="pointer-events-none absolute left-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-text-muted" />
+        <input
+          ref={inputRef}
+          value={value}
+          onChange={(e) => setValue(e.target.value)}
+          placeholder="Open a repository"
+          className="h-7 w-full rounded-control border border-rule bg-surface-2 pl-8 pr-9 font-mono text-xs text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
+        />
+        <Kbd className="absolute right-2 top-1/2 -translate-y-1/2">/</Kbd>
+      </form>
     </header>
   );
 }

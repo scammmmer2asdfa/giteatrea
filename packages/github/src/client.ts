@@ -47,7 +47,9 @@ export class GitHubClient {
   constructor(options: GitHubClientOptions = {}) {
     this.baseUrl = options.baseUrl ?? DEFAULT_BASE_URL;
     this.token = options.token ?? null;
-    this.fetchImpl = options.fetchImpl ?? fetch;
+    // Must stay bound to the global: calling an unbound `fetch` as a method
+    // throws "Can only call Window.fetch on instances of Window".
+    this.fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
   }
 
   private async request<T>(path: string, init?: RequestInit): Promise<T> {
