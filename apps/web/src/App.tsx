@@ -11,7 +11,11 @@ import { Branches } from './pages/Branches.js';
 import { Contributors } from './pages/Contributors.js';
 import { Settings, StandaloneSettings } from './pages/Settings.js';
 import { Owner } from './pages/Owner.js';
-import { ComingSoon } from './pages/ComingSoon.js';
+import { PullRequests } from './pages/PullRequests.js';
+import { Issues } from './pages/Issues.js';
+import { Releases } from './pages/Releases.js';
+import { Dependencies } from './pages/Dependencies.js';
+import { Activity } from './pages/Activity.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -48,11 +52,11 @@ export function App() {
               <Route path="commits" element={<Commits />} />
               <Route path="branches" element={<Branches />} />
               <Route path="contributors" element={<Contributors />} />
-              <Route path="dependencies" element={<ComingSoon title="Dependencies" />} />
-              <Route path="activity" element={<ComingSoon title="Activity" />} />
-              <Route path="pulls" element={<ComingSoon title="Pull Requests" />} />
-              <Route path="issues" element={<ComingSoon title="Issues" />} />
-              <Route path="releases" element={<ComingSoon title="Releases" />} />
+              <Route path="dependencies" element={<Dependencies />} />
+              <Route path="activity" element={<Activity />} />
+              <Route path="pulls" element={<PullRequests />} />
+              <Route path="issues" element={<Issues />} />
+              <Route path="releases" element={<Releases />} />
               <Route path="settings" element={<Settings />} />
             </Route>
             <Route path="*" element={<Navigate to="/" replace />} />

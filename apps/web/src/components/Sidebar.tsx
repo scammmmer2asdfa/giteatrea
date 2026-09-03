@@ -20,8 +20,6 @@ interface NavItem {
   to: string;
   icon: typeof LayoutDashboard;
   end?: boolean;
-  /** Routes with no implementation yet are marked rather than hidden. */
-  pending?: boolean;
 }
 
 function Row({ item }: { item: NavItem }) {
@@ -46,12 +44,6 @@ function Row({ item }: { item: NavItem }) {
             strokeWidth={1.75}
           />
           <span className="truncate">{item.label}</span>
-          {item.pending && (
-            <span
-              className="ml-auto h-1 w-1 shrink-0 rounded-full bg-rule-strong"
-              title="Not built yet"
-            />
-          )}
         </>
       )}
     </NavLink>
@@ -83,11 +75,11 @@ export function Sidebar() {
     {
       legend: 'Traffic',
       items: [
-        { label: 'Pull Requests', to: `${base}/pulls`, icon: GitPullRequest, pending: true },
-        { label: 'Issues', to: `${base}/issues`, icon: CircleDot, pending: true },
-        { label: 'Releases', to: `${base}/releases`, icon: Tag, pending: true },
-        { label: 'Dependencies', to: `${base}/dependencies`, icon: Package, pending: true },
-        { label: 'Activity', to: `${base}/activity`, icon: Activity, pending: true },
+        { label: 'Pull Requests', to: `${base}/pulls`, icon: GitPullRequest },
+        { label: 'Issues', to: `${base}/issues`, icon: CircleDot },
+        { label: 'Releases', to: `${base}/releases`, icon: Tag },
+        { label: 'Dependencies', to: `${base}/dependencies`, icon: Package },
+        { label: 'Activity', to: `${base}/activity`, icon: Activity },
       ],
     },
   ];

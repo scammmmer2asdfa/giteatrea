@@ -2,6 +2,7 @@ import type {
   Branch,
   Commit,
   Contributor,
+  DependencyPackage,
   FileTreeEntry,
   GitHubUser,
   IssueSummary,
@@ -11,8 +12,9 @@ import type {
   RateLimitInfo,
   Release,
   Repository,
+  WeekActivity,
 } from '@repolens/types';
-import { GitHubApiError } from '@repolens/types';
+import { GitHubApiError, StatsPendingError } from '@repolens/types';
 
 const DEFAULT_BASE_URL = 'https://api.github.com';
 
@@ -83,7 +85,8 @@ export class GitHubClient {
       throw new GitHubApiError(message, response.status, this.lastRateLimit ?? undefined);
     }
 
-    if (response.status === 204) return undefined as T;
+    // 202 means GitHub is still computing a stats cache and sends no body.
+    if (response.status === 204 || response.status === 202) return undefined as T;
     return (await response.json()) as T;
   }
 
@@ -301,12 +304,78 @@ export class GitHubClient {
     }
     return decodeBase64(data.content);
   }
+
+  /**
+   * Weekly commit counts for the last year. Throws StatsPendingError while
+   * GitHub builds the cache, which callers should treat as "retry shortly".
+   */
+  async getCommitActivity(owner: string, repo: string): Promise<WeekActivity[]> {
+    const data = await this.request<RawWeekActivity[] | undefined>(
+      `/repos/${owner}/${repo}/stats/commit_activity`,
+    );
+    // A 202 body is empty; the request helper surfaces it as undefined.
+    if (!Array.isArray(data)) throw new StatsPendingError();
+    return data.map((w) => ({ week: w.week, total: w.total, days: w.days }));
+  }
+
+  /** Dependencies from the repository's SBOM, deduplicated and sorted. */
+  async getDependencies(owner: string, repo: string): Promise<DependencyPackage[]> {
+    const data = await this.request<RawSbomResponse>(
+      `/repos/${owner}/${repo}/dependency-graph/sbom`,
+    );
+    const seen = new Set<string>();
+    const out: DependencyPackage[] = [];
+
+    for (const pkg of data.sbom?.packages ?? []) {
+      // The first entry describes the repository itself, not a dependency.
+      if (!pkg.name || pkg.SPDXID === 'SPDXRef-DOCUMENT' || pkg.name.startsWith('com.github.')) {
+        continue;
+      }
+      const purl = pkg.externalRefs?.find((r) => r.referenceType === 'purl')?.referenceLocator;
+      const ecosystem = purl?.match(/^pkg:([^/]+)\//)?.[1] ?? 'unknown';
+      const key = `${ecosystem}:${pkg.name}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+
+      out.push({
+        name: pkg.name,
+        version: pkg.versionInfo ?? null,
+        ecosystem,
+        licence:
+          pkg.licenseConcluded && pkg.licenseConcluded !== 'NOASSERTION'
+            ? pkg.licenseConcluded
+            : null,
+      });
+    }
+
+    return out.sort(
+      (a, b) => a.ecosystem.localeCompare(b.ecosystem) || a.name.localeCompare(b.name),
+    );
+  }
 }
 
 function decodeBase64(content: string): string {
   const binary = atob(content.replace(/\n/g, ''));
   const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
   return new TextDecoder('utf-8').decode(bytes);
+}
+
+interface RawWeekActivity {
+  week: number;
+  total: number;
+  days: number[];
+}
+
+interface RawSbomPackage {
+  SPDXID?: string;
+  name?: string;
+  versionInfo?: string;
+  licenseConcluded?: string;
+  externalRefs?: { referenceType?: string; referenceLocator?: string }[];
+}
+
+interface RawSbomResponse {
+  sbom?: { packages?: RawSbomPackage[] };
 }
 
 // --- Raw GitHub API shapes (subset) & mappers -----------------------------

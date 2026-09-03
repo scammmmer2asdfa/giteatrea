@@ -1,5 +1,6 @@
 import { useQuery, useInfiniteQuery } from '@tanstack/react-query';
 import { buildFileTree } from '@repolens/utils';
+import { StatsPendingError } from '@repolens/types';
 import { useGitHubClient } from './useGitHubClient.js';
 import { useAuthStore } from '../store/auth-store.js';
 
@@ -124,5 +125,63 @@ export function useAllOwnerRepositories(owner: string) {
     enabled: Boolean(owner) && !viewer.isLoading,
     initialPageParam: 1,
     getNextPageParam: (lastPage, pages) => (lastPage.length === 50 ? pages.length + 1 : undefined),
+  });
+}
+
+export function usePullRequests(owner: string, repo: string, state: 'open' | 'closed' | 'all') {
+  const client = useGitHubClient();
+  return useInfiniteQuery({
+    queryKey: ['pulls', owner, repo, state],
+    queryFn: ({ pageParam }) =>
+      client.getPullRequests(owner, repo, state, { page: pageParam, perPage: 30 }),
+    enabled: Boolean(owner && repo),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => (lastPage.length === 30 ? pages.length + 1 : undefined),
+  });
+}
+
+export function useIssues(owner: string, repo: string, state: 'open' | 'closed' | 'all') {
+  const client = useGitHubClient();
+  return useInfiniteQuery({
+    queryKey: ['issues', owner, repo, state],
+    queryFn: ({ pageParam }) =>
+      client.getIssues(owner, repo, state, { page: pageParam, perPage: 30 }),
+    enabled: Boolean(owner && repo),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => (lastPage.length === 30 ? pages.length + 1 : undefined),
+  });
+}
+
+export function useReleases(owner: string, repo: string) {
+  const client = useGitHubClient();
+  return useInfiniteQuery({
+    queryKey: ['releases', owner, repo],
+    queryFn: ({ pageParam }) => client.getReleases(owner, repo, { page: pageParam, perPage: 20 }),
+    enabled: Boolean(owner && repo),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage, pages) => (lastPage.length === 20 ? pages.length + 1 : undefined),
+  });
+}
+
+export function useDependencies(owner: string, repo: string) {
+  const client = useGitHubClient();
+  return useQuery({
+    queryKey: ['dependencies', owner, repo],
+    queryFn: () => client.getDependencies(owner, repo),
+    enabled: Boolean(owner && repo),
+    staleTime: 10 * 60 * 1000,
+  });
+}
+
+export function useCommitActivity(owner: string, repo: string) {
+  const client = useGitHubClient();
+  return useQuery({
+    queryKey: ['commit-activity', owner, repo],
+    queryFn: () => client.getCommitActivity(owner, repo),
+    enabled: Boolean(owner && repo),
+    // A 202 means the stats cache is still building, so keep retrying briefly.
+    retry: (count, error) => error instanceof StatsPendingError && count < 5,
+    retryDelay: (count) => Math.min(1000 * 2 ** count, 8000),
+    staleTime: 10 * 60 * 1000,
   });
 }

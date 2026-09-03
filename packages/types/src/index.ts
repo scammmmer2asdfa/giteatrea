@@ -138,8 +138,7 @@ export interface GitHubUser {
   htmlUrl: string;
 }
 
-/** A user or organization page header. */
-export interface OwnerProfile extends GitHubUser {
+/** A user or organization page header. */ export interface OwnerProfile extends GitHubUser {
   type: 'User' | 'Organization';
   bio: string | null;
   company: string | null;
@@ -157,6 +156,24 @@ export interface RateLimitInfo {
   reset: number;
 }
 
+/** One dependency from the repository's SBOM. */
+export interface DependencyPackage {
+  name: string;
+  version: string | null;
+  /** npm, cargo, pypi, golang, actions… derived from the SPDX package URL. */
+  ecosystem: string;
+  licence: string | null;
+}
+
+/** Commits in a single week, as reported by the commit activity stats. */
+export interface WeekActivity {
+  /** Unix seconds for the start of the week. */
+  week: number;
+  total: number;
+  /** Commits per day, Sunday first. */
+  days: number[];
+}
+
 export class GitHubApiError extends Error {
   constructor(
     message: string,
@@ -165,5 +182,16 @@ export class GitHubApiError extends Error {
   ) {
     super(message);
     this.name = 'GitHubApiError';
+  }
+}
+
+/**
+ * GitHub computes repository statistics asynchronously and answers 202 while
+ * a cache is being built. The only correct response is to retry.
+ */
+export class StatsPendingError extends Error {
+  constructor() {
+    super('GitHub is still computing these statistics.');
+    this.name = 'StatsPendingError';
   }
 }
