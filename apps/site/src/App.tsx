@@ -4,7 +4,8 @@ import { HeroMap } from './HeroMap.js';
 import { Downloads } from './Downloads.js';
 
 const REPO = 'https://github.com/scammmmer2asdfa/giteatrea';
-const APP = '/app/';
+// Follows the deployment's base path, so /app/ locally and /giteatrea/app/ on Pages.
+const APP = `${import.meta.env.BASE_URL.replace(/\/$/, '')}/app/`;
 
 function Nav() {
   return (

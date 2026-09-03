@@ -9,11 +9,15 @@ const siteDir = join(dirname(fileURLToPath(import.meta.url)), '..');
 const repoRoot = join(siteDir, '..', '..');
 const webDist = join(repoRoot, 'apps', 'web', 'dist');
 const target = join(siteDir, 'dist', 'app');
+// The nested app sits under whatever prefix the site itself is served from,
+// so on GitHub Pages that is /giteatrea/app/ rather than /app/.
+const siteBase = process.env.SITE_BASE || '/';
+const webBase = `${siteBase.replace(/\/$/, '')}/app/`;
 
 execFileSync('pnpm', ['--filter', '@repolens/web', 'build'], {
   cwd: repoRoot,
   stdio: 'inherit',
-  env: { ...process.env, WEB_BASE: '/app/' },
+  env: { ...process.env, WEB_BASE: webBase },
 });
 
 if (!existsSync(webDist)) {

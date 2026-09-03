@@ -21,8 +21,24 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      pages_enabled: ${{ steps.check.outputs.enabled }}
     steps:
       - uses: actions/checkout@v5
+
+      # GITHUB_TOKEN cannot create a Pages site — that needs admin rights the
+      # workflow will never have. So check the state instead of failing on it.
+      - id: check
+        name: Is GitHub Pages enabled for this repository?
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          if gh api "repos/${{ github.repository }}/pages" >/dev/null 2>&1; then
+            echo "enabled=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "enabled=false" >> "$GITHUB_OUTPUT"
+            echo "::notice title=Pages not enabled::Site built but not deployed. Turn Pages on at Settings > Pages > Source: GitHub Actions and the next push will publish it."
+          fi
 
       - uses: pnpm/action-setup@v4
 
@@ -33,21 +49,22 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      # Built either way, so a broken site still fails the run.
       - run: pnpm --filter @repolens/site build
         env:
           SITE_BASE: /giteatrea/
 
-      - uses: actions/configure-pages@v5
-        with:
-          # Turns Pages on for the repo on first run instead of failing.
-          enablement: true
+      - if: steps.check.outputs.enabled == 'true'
+        uses: actions/configure-pages@v5
 
-      - uses: actions/upload-pages-artifact@v4
+      - if: steps.check.outputs.enabled == 'true'
+        uses: actions/upload-pages-artifact@v4
         with:
           path: apps/site/dist
 
   deploy:
     needs: build
+    if: needs.build.outputs.pages_enabled == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
